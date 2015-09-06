@@ -11,7 +11,7 @@ help = <<HELP
 HELP
 
 options = {}
-opts = OptionParser.new do |opt|
+opts = OptionParser.new do |opts|
   opts.banner = help
 
   opts.on_tail("-h", "--help", "Show this message") do
