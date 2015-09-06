@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+$:.unshift(File.expand_path(File.join(File.dirname(__FILE__), "..", "lib")))
+require 'dvitools'
+require 'optparse'
+
+help = <<HELP
+
+  dvitools dump <path/to/file>
+
+HELP
+
+options = {}
+opts = OptionParser.new do |opt|
+  opts.banner = help
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end
+
+if ARGV.size == 2
+  DviTools::DviDumper.new.dump(ARGV[1])
+else
+  puts "Incorrect parameters.  Please `dvitools --help` for usage"
+end
