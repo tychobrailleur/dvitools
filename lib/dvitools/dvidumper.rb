@@ -12,6 +12,8 @@ module DviTools
       f = load(file)
       accept_pre(f)
       accept_page(f)
+      accept_post(f)
+      accept_post_post(f)
     end
 
     def accept_pre(f)
@@ -20,13 +22,13 @@ module DviTools
       puts "  version #{f.readbyte.ord}"
       num = f.read(4).unpack('H*').first.to_i(16)
       den = f.read(4).unpack('H*').first.to_i(16)
-      mag = f.read(4).unpack('H*').first.to_i(16)
+      @mag = f.read(4).unpack('H*').first.to_i(16)
       comment_size = f.readbyte.ord
       comment = f.read(comment_size)
 
       puts "  num = #{num}"
       puts "  den = #{den}"
-      puts "  mag = #{mag}"
+      puts "  mag = #{@mag}"
       puts "  comment = #{comment}"
       puts
     end
@@ -40,7 +42,7 @@ module DviTools
       9.times { f.read(4) }
 
       previous_page = f.read(4).unpack("l>")
-      puts "  previous page: #{previous_page}"
+ #     puts "  previous page: #{previous_page}"
 
       while (b = f.readbyte).ord != EOP
         if b == PUSH
@@ -58,7 +60,7 @@ module DviTools
         elsif b == DOWN2
           puts "  down2"
           d = f.read(2)
-          puts d.unpack("l>")
+          puts d.unpack("s>")
         elsif b == DOWN1
           puts "  down1"
           d = f.read(1)
@@ -66,10 +68,123 @@ module DviTools
         end
       end
 
-      puts "end page" unless f.readbyte.ord != EOP
+      puts "end page"
+      puts ""
+      accept_next_page(f)
+    end
+
+    def accept_next_page(f)
+      flag = false
+      peek = f.readbyte
+      flag = true if peek.ord == BOP
+
+      f.ungetbyte(peek)
+
+      accept_page(f) if flag
+    end
+
+    def accept_post(f)
+      raise "not post" unless f.readbyte.ord == POST
+      puts "post"
+
+      final_bop = f.read(4)
+#      puts "  final bop: #{final_bop.unpack('l>')}"
+
+      num = f.read(4).unpack('H*').first.to_i(16)
+      den = f.read(4).unpack('H*').first.to_i(16)
+      mag = f.read(4).unpack('H*').first.to_i(16)
+
+      puts "  num = #{num}"
+      puts "  den = #{den}"
+      puts "  mag = #{mag}"
+
+      max_length = f.read(4).unpack('H*').first.to_i(16)
+      max_height = f.read(4).unpack('H*').first.to_i(16)
+
+      puts "  max length: #{max_length}"
+      puts "  max height: #{max_height}"
+
+      max_stack_depth = f.read(2).unpack('H*').first.to_i(16)
+
+      puts "  max stack depth: #{max_stack_depth}"
+
+      total_num_page = f.read(2).unpack('H*').first.to_i(16)
+
+      puts "  number of pages: #{total_num_page}"
+      puts ""
+
+      accept_font_definition(f)
+
+    end
+
+    def accept_font_definition(f)
+      opcode = f.readbyte
+      raise "not font" unless [FONT_DEF1, FONT_DEF2, FONT_DEF3, FONT_DEF4].include?(opcode.ord)
+      puts "    font"
+      if opcode.ord == FONT_DEF1
+        d = f.read(1)
+        #puts d.unpack('c')
+      elsif opcode.ord == FONT_DEF2
+        d = f.read(2)
+        #puts d.unpack('s>')
+      elsif opcode.ord == FONT_DEF3
+        d = f.read(3)
+        #puts d.unpack('l>')
+      elsif opcode.ord == FONT_DEF4
+        d = f.read(4)
+        #puts d.unpack('l>')
+      end
+
+      # TFM checksum
+      c = f.read(4).unpack('H*').first.to_i(16)
+      #puts c
+      # scale factor
+      s = f.read(4).unpack('H*').first.to_i(16)
+      #puts s
+      # design size
+      d = f.read(4).unpack('H*').first.to_i(16)
+      #puts d
+
+      puts "      font size: #{@mag*s / (1000.0*d)}"
+
+      dir_size = f.readbyte.ord
+      filename_size = f.readbyte.ord
+
+      dir = f.read(dir_size)
+      filename = f.read(filename_size)
+
+      puts "      dir: #{dir}"
+      puts "      filename: #{filename}"
+
+      puts "    end font"
+
+      peek = f.readbyte
+      f.ungetbyte(peek)
+
+      if [FONT_DEF1, FONT_DEF2, FONT_DEF3, FONT_DEF4].include?(peek.ord)
+        accept_font_definition(f)
+      end
+
+    end
+
+    def accept_post_post(f)
+      raise "not post post" unless f.readbyte.ord == POST_POST
+      puts "post_post"
+
+      p = f.read(4)
+      i = f.readbyte.ord
+
+      raise "incorrect version" unless i == 2
+
+      4.times do
+        trailer = f.readbyte.ord
+        raise "invalid trailer" unless trailer == TRAILER
+      end
+
+      while (b = f.read) != ''
+        raise "invalid trailer" unless b.ord == TRAILER
+      end
+
     end
   end
-  # DivRenderer.new.write('/tmp/test.dvi')
-
-  # puts DviDumper.new.dump('/tmp/example.dvi')
 end

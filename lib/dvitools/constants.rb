@@ -14,6 +14,8 @@ module DviTools
   DOWN3 = 0x9f
   DOWN4 = 0xa0
 
+  TRAILER = 0xdf
+
   FONT_DEF1 = 0xf3
   FONT_DEF2 = 0xf4
   FONT_DEF3 = 0xf5
