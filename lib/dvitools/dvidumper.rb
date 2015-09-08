@@ -44,27 +44,37 @@ module DviTools
       previous_page = f.read(4).unpack("l>")
  #     puts "  previous page: #{previous_page}"
 
+
+      buffer = ''
       while (b = f.readbyte).ord != EOP
-        if b == PUSH
-          puts "  push"
-        elsif b == POP
-          puts "  pop"
-        elsif b == DOWN4
-          puts "  down4"
-          d = f.read(4)
-          puts d.unpack('l>')
-        elsif b == DOWN3
-          puts "  down3"
-          d = f.read(3)
-          puts d.unpack("l>")
-        elsif b == DOWN2
-          puts "  down2"
-          d = f.read(2)
-          puts d.unpack("s>")
-        elsif b == DOWN1
-          puts "  down1"
-          d = f.read(1)
-          puts d.unpack("l>")
+        if b >= 0 && b <= 127
+          buffer << b.chr
+        else
+          if !buffer.empty?
+            puts "  text: #{buffer}"
+            buffer = ''
+          end
+          if b == PUSH
+            puts "  push"
+          elsif b == POP
+            puts "  pop"
+          elsif b == DOWN4
+            puts "  down4"
+            d = f.read(4)
+            puts d.unpack('l>')
+          elsif b == DOWN3
+            puts "  down3"
+            d = f.read(3)
+            puts d.unpack("l>")
+          elsif b == DOWN2
+            puts "  down2"
+            d = f.read(2)
+            puts d.unpack("s>")
+          elsif b == DOWN1
+            puts "  down1"
+            d = f.read(1)
+            puts d.unpack("l>")
+          end
         end
       end
 
