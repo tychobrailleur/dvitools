@@ -59,21 +59,145 @@ module DviTools
           elsif b == POP
             puts "  pop"
           elsif b == DOWN4
-            puts "  down4"
+            print "  down4: "
             d = f.read(4)
             puts d.unpack('l>')
           elsif b == DOWN3
-            puts "  down3"
+            print "  down3: "
             d = f.read(3)
             puts d.unpack("l>")
           elsif b == DOWN2
-            puts "  down2"
+            print "  down2: "
             d = f.read(2)
             puts d.unpack("s>")
           elsif b == DOWN1
-            puts "  down1"
+            print "  down1: "
             d = f.read(1)
             puts d.unpack("l>")
+          elsif b == RIGHT1
+            print "  right1: "
+            d = f.read(1)
+            puts d.unpack('l>')
+          elsif b == RIGHT2
+            print "  right2: "
+            d = f.read(2)
+            puts d.unpack('s>')
+          elsif b == RIGHT3
+            print "  right3: "
+            d = f.read(3)
+            puts d.unpack('l>')
+          elsif b == RIGHT4
+            print "  right4: "
+            d = f.read(4)
+            puts d.unpack('l>')
+          elsif b == FONT_DEF1
+            f.ungetbyte(b)
+            accept_font_definition(f)
+          elsif b == FONT_DEF2
+            f.ungetbyte(b)
+            accept_font_definition(f)
+          elsif b == FONT_DEF3
+            f.ungetbyte(b)
+            accept_font_definition(f)
+          elsif b == FONT_DEF4
+            f.ungetbyte(b)
+            accept_font_definition(f)
+          elsif b == FNT_NUM1
+          elsif b == FNT1
+            print "  fnt1: "
+            d = f.read(1)
+            puts d.unpack('l>')
+          elsif b == FNT2
+            print "  fnt2: "
+            d = f.read(2)
+            puts d.unpack('s>')
+          elsif b == FNT3
+            print "  fnt3: "
+            d = f.read(3)
+            puts d.unpack('l>')
+          elsif b == FNT4
+            print "  fnt4: "
+            d = f.read(4)
+            puts d.unpack('l>')
+          elsif b == XXX1
+            d = f.read(1)
+          elsif b == XXX2
+            d = f.read(2)
+          elsif b == XXX3
+            d = f.read(3)
+          elsif b == XXX4
+            d = f.read(4)
+          elsif b == W0
+          elsif b == W1
+            print "  w1: "
+            d = f.read(1)
+            puts d.unpack('l>')
+          elsif b == W2
+            print "  w2: "
+            d = f.read(2)
+            puts d.unpack('s>')
+          elsif b == W3
+            print "  w3: "
+            d = f.read(3)
+            puts d.unpack('l>')
+          elsif b == W4
+            print "  w4: "
+            d = f.read(4)
+            puts d.unpack('l>')
+          elsif b == Y0
+            puts "  y0"
+          elsif b == Y1
+            print "  y1: "
+            d = f.read(1)
+            puts d.unpack('l>')
+          elsif b == Y2
+            print "  y2: "
+            d = f.read(2)
+            puts d.unpack('s>')
+          elsif b == Y3
+            print "  y3: "
+            d = f.read(3)
+            puts d.unpack('l>')
+          elsif b == Y4
+            print "  y4: "
+            d = f.read(4)
+            puts d.unpack('l>')
+          elsif b == X0
+            puts "  x0"
+          elsif b == X1
+            print "  x1: "
+            d = f.read(1)
+            puts d.unpack('l>')
+          elsif b == X2
+            print "  x2: "
+            d = f.read(2)
+            puts d.unpack('s>')
+          elsif b == X3
+            print "  x3: "
+            d = f.read(3)
+            puts d.unpack('l>')
+          elsif b == X4
+            print "  x4: "
+            d = f.read(4)
+            puts d.unpack('l>')
+          elsif b == Z0
+            puts "  z0"
+          elsif b == Z1
+            print "  z1: "
+            d = f.read(1)
+            puts d.unpack('l>')
+          elsif b == Z2
+            print "  z2: "
+            d = f.read(2)
+            puts d.unpack('s>')
+          elsif b == Z3
+            print "  z3: "
+            d = f.read(3)
+            puts d.unpack('l>')
+          elsif b == Z4
+            print "  z4: "
+            d = f.read(4)
+            puts d.unpack('l>')
           end
         end
       end
