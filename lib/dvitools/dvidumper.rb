@@ -41,20 +41,20 @@ module DviTools
       out.puts "  num = #{num}"
       out.puts "  den = #{den}"
       out.puts "  mag = #{@mag}"
-      out.puts "  comment = #{comment}"
+      out.puts "  comment = \"#{comment}\""
       out.puts
     end
 
     def accept_page(f)
       raise "not page" unless f.readbyte == BOP
       out.puts "page"
-      num_page = f.read(4)
-      out.puts "  page #{num_page.unpack('l>')}"
+      num_page = four_byte_unsigned(f)
+      out.puts "  page #{num_page}"
 
       9.times { f.read(4) }
 
-      previous_page = f.read(4).unpack("l>")
- #     out.puts "  previous page: #{previous_page}"
+      previous_page = four_byte_signed(f)
+      out.puts "  previous page: byte #{previous_page}"
 
       buffer = ''
       while (b = f.readbyte) != EOP
@@ -71,16 +71,16 @@ module DviTools
             out.puts "  pop"
           elsif b == DOWN4
             out.print "  down4: "
-            d = f.read(4)
-            out.puts d.unpack('l>')
+            d = four_byte_signed(f)
+            out.puts d
           elsif b == DOWN3
             out.print "  down3: "
-            d = f.read(3)
-            out.puts d.unpack("l>")
+            d = three_byte_signed(f)
+            out.puts d
           elsif b == DOWN2
             out.print "  down2: "
-            d = f.read(2)
-            out.puts d.unpack("s>")
+            d = two_byte_signed(f)
+            out.puts d
           elsif b == DOWN1
             out.print "  down1: "
             d = f.read(1)
@@ -91,16 +91,16 @@ module DviTools
             out.puts d.unpack('l>')
           elsif b == RIGHT2
             out.print "  right2: "
-            d = f.read(2)
-            out.puts d.unpack('s>')
+            d = two_byte_signed(f)
+            out.puts d
           elsif b == RIGHT3
             out.print "  right3: "
-            d = f.read(3)
-            out.puts d.unpack('l>')
+            d = three_byte_signed(f)
+            out.puts d
           elsif b == RIGHT4
             out.print "  right4: "
-            d = f.read(4)
-            out.puts d.unpack('l>')
+            d = four_byte_signed(f)
+            out.puts d
           elsif [FONT_DEF1, FONT_DEF2, FONT_DEF3, FONT_DEF4].include?(b)
             f.ungetbyte(b)
             accept_font_definition(f)
@@ -111,62 +111,68 @@ module DviTools
             out.puts d.unpack('l>')
           elsif b == FNT2
             out.print "  fnt2: "
-            d = f.read(2)
-            out.puts d.unpack('s>')
+            d = two_byte_unsigned(f)
+            out.puts d
           elsif b == FNT3
             out.print "  fnt3: "
-            d = f.read(3)
-            out.puts d.unpack('l>')
+            d = three_byte_unsigned(f)
+            out.puts d
           elsif b == FNT4
             out.print "  fnt4: "
-            d = f.read(4)
-            out.puts d.unpack('l>')
+            d = four_byte_unsigned(f)
+            out.puts d
           elsif b == XXX1
             d = f.read(1)
+            e = f.read(d)
           elsif b == XXX2
-            d = f.read(2)
+            d = two_byte_unsigned(f)
+            e = f.read(d)
           elsif b == XXX3
-            d = f.read(3)
+            d = three_byte_unsigned(f)
+            e = f.read(d)
           elsif b == XXX4
-            d = f.read(4)
+            d = four_byte_unsigned(f)
+            e = f.read(d)
           elsif b == SET1
             out.print "  set1: "
             d = f.read(1)
             out.puts d
           elsif b == SET2
             out.print "  set2: "
-            d = f.read(2)
+            d = two_byte_unsigned(f)
             out.puts d
           elsif b == SET3
             out.print "  set3: "
-            d = f.read(3)
+            d = three_byte_unsigned(f)
             out.puts d
           elsif b == SET4
             out.print "  set4: "
-            d = f.read(4)
+            d = four_byte_unsigned(f)
+            out.puts d
           elsif b == SET_RULE
             out.print "  set_rule: "
-            d = f.read(4)
-            e = f.read(4)
-            out.puts " #{d.unpack('l>')} #{d.unpack('l>')}"
+            d = four_byte_unsigned(f)
+            e = four_byte_unsigned(f)
+            out.puts " #{d} #{e}"
           elsif b == PUT_RULE
             out.print "  put_rule: "
-            d = f.read(4)
-            e = f.read(4)
-            out.puts " #{d.unpack('l>')} #{d.unpack('l>')}"
+            d = four_byte_unsigned(f)
+            e = four_byte_unsigned(f)
+            out.puts " #{d} #{e}"
           elsif b == NOP
+            continue
           elsif b == PUT1
             out.print "  put1: "
             d = f.read(1)
             out.puts d
           elsif b == PUT2
-            d = f.read(2)
+            d = two_byte_unsigned(f)
             out.puts d
           elsif b == PUT3
-            d = f.read(3)
+            d = three_byte_unsigned(f)
             out.puts d
           elsif b == PUT4
-            d = f.read(4)
+            d = four_byte_unsigned(f)
             out.puts d
           elsif b == W0
           elsif b == W1
@@ -175,16 +181,16 @@ module DviTools
             out.puts d.unpack('l>')
           elsif b == W2
             out.print "  w2: "
-            d = f.read(2)
-            out.puts d.unpack('s>')
+            d = two_byte_signed(f)
+            out.puts d
           elsif b == W3
             out.print "  w3: "
-            d = f.read(3)
-            out.puts d.unpack('l>')
+            d = three_byte_signed(f)
+            out.puts d
           elsif b == W4
             out.print "  w4: "
-            d = f.read(4)
-            out.puts d.unpack('l>')
+            d = four_byte_signed(f)
+            out.puts d
           elsif b == Y0
             out.puts "  y0"
           elsif b == Y1
@@ -193,16 +199,16 @@ module DviTools
             out.puts d.unpack('l>')
           elsif b == Y2
             out.print "  y2: "
-            d = f.read(2)
-            out.puts d.unpack('s>')
+            d = two_byte_signed(f)
+            out.puts d
           elsif b == Y3
             out.print "  y3: "
-            d = f.read(3)
-            out.puts d.unpack('l>')
+            d = three_byte_signed(f)
+            out.puts d
           elsif b == Y4
             out.print "  y4: "
-            d = f.read(4)
-            out.puts d.unpack('l>')
+            d = four_byte_signed(f)
+            out.puts d
           elsif b == X0
             out.puts "  x0"
           elsif b == X1
@@ -211,16 +217,16 @@ module DviTools
             out.puts d.unpack('l>')
           elsif b == X2
             out.print "  x2: "
-            d = f.read(2)
-            out.puts d.unpack('s>')
+            d = two_byte_signed(f)
+            out.puts d
           elsif b == X3
             out.print "  x3: "
-            d = f.read(3)
-            out.puts d.unpack('l>')
+            d = three_byte_signed(f)
+            out.puts d
           elsif b == X4
             out.print "  x4: "
-            d = f.read(4)
-            out.puts d.unpack('l>')
+            d = four_byte_signed(f)
+            out.puts d
           elsif b == Z0
             out.puts "  z0"
           elsif b == Z1
@@ -229,16 +235,16 @@ module DviTools
             out.puts d.unpack('l>')
           elsif b == Z2
             out.print "  z2: "
-            d = f.read(2)
-            out.puts d.unpack('s>')
+            d = two_byte_signed(f)
+            out.puts d
           elsif b == Z3
             out.print "  z3: "
-            d = f.read(3)
-            out.puts d.unpack('l>')
+            d = three_byte_signed(f)
+            out.puts d
           elsif b == Z4
             out.print "  z4: "
-            d = f.read(4)
-            out.puts d.unpack('l>')
+            d = four_byte_signed(f)
+            out.puts d
           end
         end
       end
@@ -252,7 +258,7 @@ module DviTools
     def accept_next_page(f)
       flag = false
       peek = peek(f)
-      flag = true if peek.ord == BOP
+      flag = true if peek == BOP
 
       accept_page(f) if flag
     end
@@ -261,7 +267,7 @@ module DviTools
       raise "not post" unless f.readbyte == POST
       out.puts "post"
 
-      final_bop = f.read(4)
+      final_bop = four_byte_unsigned(f)
 #      out.puts "  final bop: #{final_bop.unpack('l>')}"
 
       num = four_byte_unsigned(f)
@@ -298,14 +304,11 @@ module DviTools
         d = f.read(1)
         #puts d.unpack('c')
       elsif opcode == FONT_DEF2
-        d = f.read(2)
-        #puts d.unpack('s>')
+        d = two_byte_unsigned(f)
       elsif opcode == FONT_DEF3
-        d = f.read(3)
-        #puts d.unpack('l>')
+        d = three_byte_unsigned(f)
       elsif opcode == FONT_DEF4
-        d = f.read(4)
-        #puts d.unpack('l>')
+        d = four_byte_unsigned(f)
       end
 
       # TFM checksum
@@ -353,12 +356,8 @@ module DviTools
         raise "invalid trailer" unless trailer == TRAILER
       end
 
-      begin
-        while b = f.readbyte
-          raise "invalid trailer: #{b}" unless b == TRAILER
-        end
-      rescue EOFError
-        f.close
+      while b = f.getbyte
+        raise "invalid trailer: #{b}" unless b == TRAILER
       end
     end
   end

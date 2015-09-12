@@ -25,4 +25,20 @@ describe 'DviTools::Helper' do
       d.should eq(25400000)
     end
   end
+
+  describe 'four_byte_signed' do
+
+    let(:p) { StringIO.new([0x02, 0x83, 0x33, 0xda].pack('C*')) }
+    let(:n) { StringIO.new([0xfd, 0x86, 0xcc, 0x26].pack('C*')) }
+
+    it 'reads four bytes and converts them to an unsigned positive integer' do
+      d = subject.four_byte_signed(p)
+      d.should eq(42152922)
+    end
+
+    it 'reads four bytes and converts them to an unsigned negative integer' do
+      d = subject.four_byte_signed(n)
+      d.should eq(-41497562)
+    end
+  end
 end
